@@ -20,16 +20,17 @@ enum Role {
 }
 
 model User {
-  id               Int                @id @default(autoincrement())
-  name             String
-  email            String             @unique
-  passwordHash     String
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  role             Role               @default(USER)
-  UserInvalidToken UserInvalidToken[]
-  twoFAEnable      Boolean            @default(false)
-  twoFASecret      String?
+  id                Int                @id @default(autoincrement())
+  name              String
+  email             String             @unique
+  passwordHash      String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  role              Role               @default(USER)
+  passwordChangedAt DateTime           @default(now())
+  UserInvalidToken  UserInvalidToken[]
+  twoFAEnable       Boolean            @default(false)
+  twoFASecret       String?
 }
 
 model RefreshToken {

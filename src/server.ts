@@ -76,8 +76,6 @@ const authGuard = async (req: Request, res: Response, next: NextFunction) => {
       process.env.ACCESS_TOKEN_SECRET_KEY
     ) as AccessTokenPayload;
 
-    console.log("decodedAccessToken", decodedAccessToken);
-
     req.user = { id: decodedAccessToken.userId };
     req.accessToken = { value: accessToken, exp: decodedAccessToken?.iat };
 
@@ -236,6 +234,73 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
       return res.status(500).json({ message: err.message });
   }
 });
+
+app.post(
+  "/api/auth/change-password",
+  authGuard,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(422).json({
+          message: "Both currentPassword and newPassword are required",
+        });
+      }
+
+      console.log("change-pass", currentPassword, newPassword);
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: req.user.id,
+        },
+      });
+
+      if (user) {
+        const passwordMatch = await bcrypt.compare(
+          currentPassword,
+          user.passwordHash
+        );
+
+        if (!passwordMatch) {
+          return res.status(400).json({
+            message: "Current password does not match",
+          });
+        }
+
+        const isSameAsCurrent = await bcrypt.compare(
+          newPassword,
+          user.passwordHash
+        );
+
+        if (isSameAsCurrent) {
+          return res.status(400).json({
+            message: "New password cannot be the same as current password",
+          });
+        }
+
+        const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+          where: {
+            id: req.user.id,
+          },
+          data: {
+            passwordHash: newHashedPassword,
+            passwordChangedAt: new Date(),
+          },
+        });
+
+        return res
+          .status(200)
+          .json({ message: "Password updated successfully" });
+      }
+    } catch (err) {
+      if (err instanceof Error)
+        return res.status(500).json({ message: err.message });
+    }
+  }
+);
 
 app.post(
   "/api/auth/login/2fa",
@@ -441,6 +506,15 @@ app.post(
         return res.status(500).json({ message: err.message });
       }
     }
+  }
+);
+
+app.post(
+  "/api/auth/2fa/disable",
+  authGuard,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+    } catch (err) {}
   }
 );
 
