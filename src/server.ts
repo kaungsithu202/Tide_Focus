@@ -241,15 +241,13 @@ app.post(
   authGuard,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { currentPassword, newPassword } = req.body;
+      const { currentPassword, newPassword, totp } = req.body;
 
       if (!currentPassword || !newPassword) {
         return res.status(422).json({
           message: "Both currentPassword and newPassword are required",
         });
       }
-
-      console.log("change-pass", currentPassword, newPassword);
 
       const user = await prisma.user.findUnique({
         where: {
@@ -267,6 +265,16 @@ app.post(
           return res.status(400).json({
             message: "Current password does not match",
           });
+        }
+
+        if (user.twoFAEnable && user.twoFASecret) {
+          const verified = authenticator.check(totp, user.twoFASecret);
+
+          if (!verified) {
+            return res
+              .status(401)
+              .json({ message: "The provided TOTP is incorrect or expired" });
+          }
         }
 
         const isSameAsCurrent = await bcrypt.compare(
