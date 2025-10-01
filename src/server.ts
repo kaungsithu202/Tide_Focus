@@ -227,6 +227,7 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
         email: user.email,
         accessToken,
         refreshToken,
+        twoFaEnable: user.twoFAEnable,
       });
     }
   } catch (err) {
@@ -370,6 +371,7 @@ app.post(
           email: user.email,
           accessToken,
           refreshToken,
+          twoFaEnable: user.twoFAEnable,
         });
       }
     } catch (err) {
@@ -514,7 +516,56 @@ app.post(
   authGuard,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-    } catch (err) {}
+      const { currentPassword, totp } = req.body;
+
+      if (!currentPassword || !totp) {
+        return res
+          .status(422)
+          .json({ message: "Both current password and totp required" });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: req.user.id,
+        },
+      });
+
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
+      }
+
+      const passwordMatch = await bcrypt.compare(
+        currentPassword,
+        user.passwordHash
+      );
+
+      if (!passwordMatch)
+        return res.status(400).json({ message: "Incorrect password" });
+
+      if (user?.twoFASecret) {
+        const verified = authenticator.check(totp, user?.twoFASecret);
+
+        if (!verified) {
+          return res
+            .status(400)
+            .json({ message: "TOTP is not correct or expired" });
+        }
+      }
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          twoFAEnable: false,
+          twoFASecret: null,
+        },
+      });
+
+      return res.status(200).json({ message: "2FA disabled successfully" });
+    } catch (err) {
+      if (err instanceof Error) {
+        return res.status(500).json({ message: err.message });
+      }
+    }
   }
 );
 
