@@ -8,6 +8,13 @@
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"noEmit": true,
-		"allowImportingTsExtensions": true
-	}
+		"allowImportingTsExtensions": true,
+		"typeRoots": [
+			"./src/types",
+			"./node_modules/@types"
+		]
+	},
+	"include": [
+		"src/**/*"
+	]
 }
