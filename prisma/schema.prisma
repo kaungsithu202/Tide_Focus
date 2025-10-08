@@ -64,8 +64,9 @@ model Session {
   durationSeconds    Int? // planned duration for timer mode
   elapsedSeconds     Int         @default(0) //The total focus time that has actually passed, in seconds.
   totalPausedSeconds Int         @default(0) //Total amount of time the session was paused, in seconds.
-  startedAt          DateTime
+  startedAt          DateTime    @default(now())
   endedAt            DateTime?
+  pausedAt           DateTime?
   isCompleted        Boolean     @default(false)
 
   createdAt DateTime @default(now())
