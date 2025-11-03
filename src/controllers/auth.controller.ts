@@ -31,10 +31,17 @@ export const login = wrapAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(422).json({ message: "Please fill all fields" });
+    throw new BadRequestError("Please fill all fields");
   }
 
   const result = await loginService({ email, password });
+
+  // Set refresh token in HttpOnly cookie
+  res.cookie("refreshToken", result.refreshToken, {
+    httpOnly: true,
+    secure: true, // true in production (HTTPS)
+    sameSite: "strict", // CSRF protection
+  });
 
   return res.status(200).json(result);
 });
@@ -47,6 +54,7 @@ export const changePassword = wrapAsync(async (req: Request, res: Response) => {
       message: "Both currentPassword and newPassword are required",
     });
   }
+
   const result = await changePasswordService({
     userId: req.user.id,
     currentPassword,
@@ -111,14 +119,21 @@ export const disableTwoFa = wrapAsync(async (req: Request, res: Response) => {
 });
 
 export const refreshToken = wrapAsync(async (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
+  const { refreshToken } = req.cookies;
 
   if (!refreshToken) {
-    throw new UnauthorizedError("Refresh token not found");
+    throw new UnauthorizedError("Refresh token not found Controller");
   }
 
   const result = await refreshTokenService({ refreshToken });
 
-  return res.status(200).json(400);
+  // Set refresh token in HttpOnly cookie
+  res.cookie("refreshToken", result.refreshToken, {
+    httpOnly: true,
+    secure: true, // true in production (HTTPS)
+    sameSite: "strict", // CSRF protection
+  });
+
+  return res.status(200).json(result);
 });
 export const logout4 = wrapAsync(async () => {});

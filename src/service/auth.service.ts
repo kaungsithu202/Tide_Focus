@@ -96,13 +96,13 @@ export async function loginService({ email, password }: LoginInput) {
   });
 
   if (!user) {
-    throw new Error("Email or password is invalid.");
+    throw new BadRequestError("Email or password is invalid.");
   }
 
   const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
   if (!passwordMatch) {
-    throw new Error("Email or password is invalid.");
+    throw new BadRequestError("Email or password is invalid.");
   }
 
   if (user.twoFAEnable) {

@@ -9,7 +9,11 @@ import InternalServerError from "../errors/InternalServerError.ts";
 // }
 
 const authGuard = async (req: Request, res: Response, next: NextFunction) => {
-  const accessToken = req.headers.authorization;
+  const authorization = req.headers.authorization;
+
+  const accessToken = authorization?.startsWith("Bearer ")
+    ? authorization?.split(" ")[1]
+    : authorization;
 
   if (!accessToken) {
     throw new UnauthorizedError("Access token not found");
@@ -36,6 +40,7 @@ const authGuard = async (req: Request, res: Response, next: NextFunction) => {
 
     next();
   } catch (error: unknown) {
+    console.log("error", error);
     if (error instanceof jwt.TokenExpiredError) {
       throw new UnauthorizedError("Access token expired");
     } else if (error instanceof jwt.JsonWebTokenError) {

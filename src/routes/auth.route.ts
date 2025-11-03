@@ -27,6 +27,6 @@ router.post("/2fa/generate", authGuard, generateTwoFa);
 
 router.post("/2fa/disable", authGuard, disableTwoFa);
 
-router.post("/refresh-token", authGuard, refreshToken);
+router.post("/refresh-token", refreshToken);
 
 export default router;

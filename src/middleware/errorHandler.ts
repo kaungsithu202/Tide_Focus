@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-// import config from "../config";
 import jwt from "jsonwebtoken";
 import { getErrorMessage } from "../util/util.ts";
 import CustomError from "../errors/CustomError.ts";

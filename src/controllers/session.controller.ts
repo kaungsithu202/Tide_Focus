@@ -31,11 +31,24 @@ export const startSession = wrapAsync(async (req: Request, res: Response) => {
   return res.status(200).json(result);
 });
 
-export const getAllSessions = wrapAsync(async (req: Request, res: Response) => {
-  const result = await getAllSessionsService();
+interface SessionQuery {
+  startDate?: string;
+  endDate?: string;
+}
 
-  return res.status(200).json(result);
-});
+export const getAllSessions = wrapAsync(
+  async (req: Request<{}, {}, {}, SessionQuery>, res: Response) => {
+    const { startDate, endDate } = req.query;
+
+    const result = await getAllSessionsService({
+      startDate,
+      endDate,
+      userId: req.user.id,
+    });
+
+    return res.status(200).json(result);
+  }
+);
 
 export const pauseSession = wrapAsync(async (req: Request, res: Response) => {
   const id = Number(req.params.id);

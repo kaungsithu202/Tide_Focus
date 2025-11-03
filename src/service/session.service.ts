@@ -1,6 +1,7 @@
 import prisma from "../config/db";
 import BadRequestError from "../errors/BadRequestError";
 import EntityNotFoundError from "../errors/EntityNotFoundError";
+import { GetAllSessionService } from "../types/session";
 
 export const startSessionService = async ({
   userId,
@@ -33,8 +34,43 @@ export const startSessionService = async ({
   });
 };
 
-export const getAllSessionsService = async () => {
-  return await prisma.session.findMany();
+export const getAllSessionsService = async ({
+  startDate,
+  endDate,
+  userId,
+}: GetAllSessionService) => {
+  console.log("trigger", userId);
+  const whereClause: any = {
+    isCompleted: true,
+  };
+
+  if (startDate && endDate) {
+    whereClause.createdAt = {
+      gte: startDate,
+      lte: endDate,
+    };
+  } else {
+    whereClause.userId = userId;
+  }
+
+  return await prisma.session.findMany({
+    where: whereClause,
+    select: {
+      id: true,
+      startedAt: true,
+      endedAt: true,
+      elapsedSeconds: true,
+      isCompleted: true,
+      type: true,
+      category: {
+        select: {
+          name: true,
+          id: true,
+          color: true,
+        },
+      },
+    },
+  });
 };
 
 export const pauseSessionService = async ({ id }: { id: number }) => {

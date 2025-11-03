@@ -38,6 +38,7 @@ model User {
   twoFASecret       String?
   Category          Category[]
   Session           Session[]
+  RefreshToken      RefreshToken[]
 }
 
 model Category {
@@ -57,26 +58,34 @@ model Session {
   id         Int       @id @default(autoincrement())
   user       User      @relation(fields: [userId], references: [id])
   userId     Int
-  category   Category? @relation(fields: [categoryId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId Int?
 
-  type               SessionType
-  durationSeconds    Int? // planned duration for timer mode
-  elapsedSeconds     Int         @default(0) //The total focus time that has actually passed, in seconds.
-  totalPausedSeconds Int         @default(0) //Total amount of time the session was paused, in seconds.
-  startedAt          DateTime    @default(now())
-  endedAt            DateTime?
+  // 🕹️ Session type: TIMER (Pomodoro) or STOPWATCH (open-ended)
+  type SessionType
+
+  // 🧭 Timer fields
+  durationSeconds Int? // planned duration for one focus cycle
+
+  // ⏱️ Common tracking fields (used by both timer & stopwatch)
+  elapsedSeconds     Int       @default(0) // total focus time that has actually passed
+  totalPausedSeconds Int       @default(0) // total time paused
+  startedAt          DateTime  @default(now())
   pausedAt           DateTime?
-  isCompleted        Boolean     @default(false)
+  endedAt            DateTime?
+  isCompleted        Boolean   @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model RefreshToken {
-  id           Int    @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
   userId       Int
-  refreshToken String @unique
+  refreshToken String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 }
 
 model UserInvalidToken {
