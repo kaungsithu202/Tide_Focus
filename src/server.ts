@@ -23,9 +23,28 @@ const port = 4000;
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:3005",
+  "https://tide-focus-web.vercel.app/",
+];
+//
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:3005", credentials: true }));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, or Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(routes);
 app.use(errorHandler);
 

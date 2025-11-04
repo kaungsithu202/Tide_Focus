@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -12,16 +6,6 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-}
-
-enum Role {
-  ADMIN
-  USER
-}
-
-enum SessionType {
-  timer
-  stopwatch
 }
 
 model User {
@@ -33,59 +17,57 @@ model User {
   updatedAt         DateTime           @updatedAt
   role              Role               @default(USER)
   passwordChangedAt DateTime           @default(now())
-  UserInvalidToken  UserInvalidToken[]
   twoFAEnable       Boolean            @default(false)
   twoFASecret       String?
   Category          Category[]
-  Session           Session[]
   RefreshToken      RefreshToken[]
+  Session           Session[]
+  UserInvalidToken  UserInvalidToken[]
 }
 
 model Category {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  id        Int       @id @default(autoincrement())
   userId    Int
   name      String
-  color     String? // optional UI color
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  color     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id])
+  sessions  Session[]
 
-  // Relations
-  sessions Session[]
+  @@index([userId], map: "Category_userId_fkey")
 }
 
 model Session {
-  id         Int       @id @default(autoincrement())
-  user       User      @relation(fields: [userId], references: [id])
-  userId     Int
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId Int?
-
-  // 🕹️ Session type: TIMER (Pomodoro) or STOPWATCH (open-ended)
-  type SessionType
-
-  // 🧭 Timer fields
-  durationSeconds Int? // planned duration for one focus cycle
-
-  // ⏱️ Common tracking fields (used by both timer & stopwatch)
-  elapsedSeconds     Int       @default(0) // total focus time that has actually passed
-  totalPausedSeconds Int       @default(0) // total time paused
-  startedAt          DateTime  @default(now())
+  id                 Int         @id @default(autoincrement())
+  userId             Int
+  categoryId         Int?
+  type               SessionType
+  durationSeconds    Int?
+  elapsedSeconds     Int         @default(0)
+  totalPausedSeconds Int         @default(0)
+  startedAt          DateTime    @default(now())
   pausedAt           DateTime?
   endedAt            DateTime?
-  isCompleted        Boolean   @default(false)
+  isCompleted        Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  category           Category?   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user               User        @relation(fields: [userId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@index([categoryId], map: "Session_categoryId_fkey")
+  @@index([userId], map: "Session_userId_fkey")
 }
 
 model RefreshToken {
   id           Int      @id @default(autoincrement())
-  user         User     @relation(fields: [userId], references: [id])
   userId       Int
   refreshToken String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "RefreshToken_userId_fkey")
 }
 
 model UserInvalidToken {
@@ -93,6 +75,17 @@ model UserInvalidToken {
   accessToken    String
   userId         Int
   expirationTime Int
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId], map: "UserInvalidToken_userId_fkey")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum SessionType {
+  timer
+  stopwatch
 }
