@@ -3,12 +3,14 @@
 	"compilerOptions": {
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
+		"rootDir": "src",
 		"target": "ES2020",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
 		"strict": true,
 		"noEmit": true,
+		"outDir": "dist",
 		"allowImportingTsExtensions": true,
 		"types": [
 			"node"
