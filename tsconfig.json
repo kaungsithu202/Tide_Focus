@@ -9,9 +9,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
 		"strict": true,
-		"noEmit": true,
-		"outDir": "./dist",
-		"allowImportingTsExtensions": true,
+		"outDir": "dist",
 		"types": [
 			"node"
 		],

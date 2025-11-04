@@ -1,4 +1,4 @@
-import CustomError from "./CustomError.ts";
+import CustomError from "./CustomError";
 
 class BadRequestError extends CustomError<"ERR_BAD_REQUEST"> {
   constructor(message = "Bad request") {

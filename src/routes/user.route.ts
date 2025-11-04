@@ -1,6 +1,6 @@
 import { Router } from "express";
-import authGuard from "../middleware/authGuard.ts";
-import { user } from "../controllers/user.controller.ts";
+import authGuard from "../middleware/authGuard";
+import { user } from "../controllers/user.controller";
 
 const router = Router();
 

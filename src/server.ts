@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
-import prisma from "./config/db.ts";
-import errorHandler from "./middleware/errorHandler.ts";
-import routes from "./routes/index.ts";
+import prisma from "./config/db";
+import errorHandler from "./middleware/errorHandler";
+import routes from "./routes/index";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 

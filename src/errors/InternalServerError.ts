@@ -1,4 +1,4 @@
-import CustomError from "./CustomError.ts";
+import CustomError from "./CustomError";
 
 class InternalServerError extends CustomError<"ERR_INTERNAL_SERVER"> {
   constructor(message = "Internal Server Error") {

@@ -8,8 +8,8 @@ import {
   refreshToken,
   register,
   twoFaLogin,
-} from "../controllers/auth.controller.ts";
-import authGuard from "../middleware/authGuard.ts";
+} from "../controllers/auth.controller";
+import authGuard from "../middleware/authGuard";
 
 const router = Router();
 

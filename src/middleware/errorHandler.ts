@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { getErrorMessage } from "../util/util.ts";
-import CustomError from "../errors/CustomError.ts";
+import { getErrorMessage } from "../util/util";
+import CustomError from "../errors/CustomError";
 
 export default function errorHandler(
   error: unknown,

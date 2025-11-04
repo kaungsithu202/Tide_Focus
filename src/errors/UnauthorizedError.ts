@@ -1,4 +1,4 @@
-import CustomError from "./CustomError.ts";
+import CustomError from "./CustomError";
 
 class UnauthorizedError extends CustomError<"ERR_UNAUTHORIZED"> {
   constructor(message = "Unauthorized") {

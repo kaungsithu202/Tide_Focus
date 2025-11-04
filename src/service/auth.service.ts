@@ -1,10 +1,10 @@
-import prisma from "../config/db.ts";
+import prisma from "../config/db";
 import bcrypt from "bcryptjs";
 import NodeCache from "node-cache";
 import jwt from "jsonwebtoken";
-import BadRequestError from "../errors/BadRequestError.ts";
+import BadRequestError from "../errors/BadRequestError";
 import { authenticator } from "otplib";
-import UnauthorizedError from "../errors/UnauthorizedError.ts";
+import UnauthorizedError from "../errors/UnauthorizedError";
 import { Request } from "express";
 import QRCode from "qrcode";
 

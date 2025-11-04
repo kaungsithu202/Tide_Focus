@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { wrapAsync } from "../util/util.ts";
+import { wrapAsync } from "../util/util";
 import {
   changePasswordService,
   disableTwoFaService,
@@ -10,9 +10,9 @@ import {
   registerService,
   twoFaLoginService,
   validateTwoFaService,
-} from "../service/auth.service.ts";
-import BadRequestError from "../errors/BadRequestError.ts";
-import UnauthorizedError from "../errors/UnauthorizedError.ts";
+} from "../service/auth.service";
+import BadRequestError from "../errors/BadRequestError";
+import UnauthorizedError from "../errors/UnauthorizedError";
 
 export const register = wrapAsync(async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;

@@ -3,8 +3,8 @@
 //       .json({ id: user.id, name: user.name, email: user.email });
 //   })
 
-import prisma from "../config/db.ts";
-import EntityNotFoundError from "../errors/EntityNotFoundError.ts";
+import prisma from "../config/db";
+import EntityNotFoundError from "../errors/EntityNotFoundError";
 
 export async function userService({ userId }: { userId: number }) {
   const user = await prisma.user.findUnique({

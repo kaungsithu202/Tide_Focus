@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../config/db.ts";
+import prisma from "../config/db";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import UnauthorizedError from "../errors/UnauthorizedError.ts";
-import InternalServerError from "../errors/InternalServerError.ts";
+import UnauthorizedError from "../errors/UnauthorizedError";
+import InternalServerError from "../errors/InternalServerError";
 
 // interface AccessTokenPayload extends jwt.JwtPayload {
 //   userId: number;

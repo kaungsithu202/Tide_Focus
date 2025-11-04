@@ -1,9 +1,9 @@
 import { Router } from "express";
-import adminRoute from "./admin.route.ts";
-import authRoute from "./auth.route.ts";
-import userRoute from "./user.route.ts";
-import categoryRoute from "./categories.route.ts";
-import sessionRoute from "./session.route.ts";
+import adminRoute from "./admin.route";
+import authRoute from "./auth.route";
+import userRoute from "./user.route";
+import categoryRoute from "./categories.route";
+import sessionRoute from "./session.route";
 
 const router = Router();
 

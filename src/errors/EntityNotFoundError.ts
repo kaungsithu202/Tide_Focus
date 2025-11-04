@@ -1,4 +1,4 @@
-import CustomError from "./CustomError.ts";
+import CustomError from "./CustomError";
 
 class EntityNotFoundError extends CustomError<"ERR_NF"> {
   constructor(message = "Entity not found") {
