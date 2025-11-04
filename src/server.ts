@@ -25,7 +25,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3005",
-  "https://tide-focus-web.vercel.app/",
+  "https://tide-focus-web.vercel.app",
 ];
 //
 
