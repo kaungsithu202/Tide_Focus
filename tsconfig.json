@@ -9,6 +9,9 @@
 		"strict": true,
 		"noEmit": true,
 		"allowImportingTsExtensions": true,
+		"types": [
+			"node"
+		],
 		"typeRoots": [
 			"./src/types",
 			"./node_modules/@types"
