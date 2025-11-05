@@ -6,7 +6,11 @@ import {
   UpdateCategoryDto,
 } from "../types/category";
 
-export const getAllCategoriesService = async (userId: number) => {
+export const getAllCategoriesService = async ({
+  userId,
+}: {
+  userId: number;
+}) => {
   return await prisma.category.findMany({
     where: { userId },
     orderBy: {
