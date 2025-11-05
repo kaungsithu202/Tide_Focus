@@ -40,7 +40,7 @@ export const login = wrapAsync(async (req: Request, res: Response) => {
   res.cookie("refreshToken", result.refreshToken, {
     httpOnly: true,
     secure: true, // true in production (HTTPS)
-    sameSite: "strict", // CSRF protection
+    sameSite: "none",
   });
 
   return res.status(200).json(result);
@@ -122,7 +122,7 @@ export const refreshToken = wrapAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
 
   if (!refreshToken) {
-    throw new UnauthorizedError("Refresh token not found Controller");
+    throw new UnauthorizedError("Refresh token not found");
   }
 
   const result = await refreshTokenService({ refreshToken });
@@ -131,7 +131,7 @@ export const refreshToken = wrapAsync(async (req: Request, res: Response) => {
   res.cookie("refreshToken", result.refreshToken, {
     httpOnly: true,
     secure: true, // true in production (HTTPS)
-    sameSite: "strict", // CSRF protection
+    sameSite: "none",
   });
 
   return res.status(200).json(result);
