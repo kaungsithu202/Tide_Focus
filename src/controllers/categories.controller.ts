@@ -11,7 +11,7 @@ import BadRequestError from "../errors/BadRequestError";
 
 export const getAllCategories = wrapAsync(
   async (req: Request, res: Response) => {
-    const result = await getAllCategoriesService();
+    const result = await getAllCategoriesService({ userId: req.user.id });
     return res.status(200).json(result);
   }
 );
