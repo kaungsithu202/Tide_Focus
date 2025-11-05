@@ -7,6 +7,7 @@ import {
   logout,
   refreshToken,
   register,
+  setCookie,
   twoFaLogin,
 } from "../controllers/auth.controller";
 import authGuard from "../middleware/authGuard";
@@ -17,7 +18,7 @@ router.post("/register", register);
 
 router.post("/login", login);
 
-router.post("/set-cookie", login);
+router.get("/set-cookie", setCookie);
 
 router.post("/change-password", changePassword);
 
