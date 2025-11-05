@@ -46,6 +46,15 @@ export const login = wrapAsync(async (req: Request, res: Response) => {
   return res.status(200).json(result);
 });
 
+export const setCookie = wrapAsync(async (req: Request, res: Response) => {
+  res.cookie("myCookie", "myValue", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  return res.status(201).json();
+});
+
 export const changePassword = wrapAsync(async (req: Request, res: Response) => {
   const { currentPassword, newPassword, totp } = req.body;
 

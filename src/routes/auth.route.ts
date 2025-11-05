@@ -17,6 +17,8 @@ router.post("/register", register);
 
 router.post("/login", login);
 
+router.post("/set-cookie", login);
+
 router.post("/change-password", changePassword);
 
 router.post("/login/2fa", twoFaLogin);
