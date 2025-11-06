@@ -82,9 +82,29 @@ export async function registerService({
     },
   });
 
+  const accessToken = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.ACCESS_TOKEN_SECRET_KEY!,
+    {
+      subject: "accessApi",
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRE_TIME as any,
+    }
+  );
+
+  const refreshToken = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.REFRESH_TOKEN_SECRET_KEY!,
+    {
+      subject: "refreshToken",
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRE_TIME as any,
+    }
+  );
+
   return {
     message: "User registered successfully",
     userId: user.id,
+    accessToken,
+    refreshToken,
   };
 }
 

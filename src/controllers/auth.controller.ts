@@ -24,6 +24,12 @@ export const register = wrapAsync(async (req: Request, res: Response) => {
     role,
   });
 
+  res.cookie("refreshToken", result.refreshToken, {
+    httpOnly: true,
+    secure: true, // true in production (HTTPS)
+    sameSite: "none",
+  });
+
   return res.status(201).json(result);
 });
 
