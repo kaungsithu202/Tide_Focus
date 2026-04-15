@@ -3,16 +3,31 @@ import { wrapAsync } from "../util/util";
 import {
   changePasswordService,
   disableTwoFaService,
+  forgotPasswordService,
   generateTwoFaService,
   loginService,
   logoutService,
   refreshTokenService,
   registerService,
+  resetPasswordService,
   twoFaLoginService,
   validateTwoFaService,
 } from "../service/auth.service";
 import BadRequestError from "../errors/BadRequestError";
 import UnauthorizedError from "../errors/UnauthorizedError";
+
+const getRefreshTokenCookieOptions = (req: Request) => {
+  const isSecureCookie =
+    req.secure ||
+    req.get("x-forwarded-proto") === "https" ||
+    process.env.NODE_ENV === "production";
+
+  return {
+    httpOnly: true,
+    secure: isSecureCookie,
+    sameSite: isSecureCookie ? ("none" as const) : ("lax" as const),
+  };
+};
 
 export const register = wrapAsync(async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
@@ -24,11 +39,11 @@ export const register = wrapAsync(async (req: Request, res: Response) => {
     role,
   });
 
-  res.cookie("refreshToken", result.refreshToken, {
-    httpOnly: true,
-    secure: true, // true in production (HTTPS)
-    sameSite: "none",
-  });
+  res.cookie(
+    "refreshToken",
+    result.refreshToken,
+    getRefreshTokenCookieOptions(req)
+  );
 
   return res.status(201).json(result);
 });
@@ -42,12 +57,13 @@ export const login = wrapAsync(async (req: Request, res: Response) => {
 
   const result = await loginService({ email, password });
 
-  // Set refresh token in HttpOnly cookie
-  res.cookie("refreshToken", result.refreshToken, {
-    httpOnly: true,
-    secure: true, // true in production (HTTPS)
-    sameSite: "none",
-  });
+  if ("refreshToken" in result) {
+    res.cookie(
+      "refreshToken",
+      result.refreshToken,
+      getRefreshTokenCookieOptions(req)
+    );
+  }
 
   return res.status(200).json(result);
 });
@@ -89,11 +105,21 @@ export const twoFaLogin = wrapAsync(async (req: Request, res: Response) => {
 
   const result = await twoFaLoginService({ tempToken, totp });
 
+  if (result && "refreshToken" in result) {
+    res.cookie(
+      "refreshToken",
+      result.refreshToken,
+      getRefreshTokenCookieOptions(req)
+    );
+  }
+
   return res.status(200).json(result);
 });
 
 export const logout = wrapAsync(async (req: Request, res: Response) => {
   await logoutService(req);
+
+  res.clearCookie("refreshToken", getRefreshTokenCookieOptions(req));
 
   return res.status(204).send();
 });
@@ -143,12 +169,45 @@ export const refreshToken = wrapAsync(async (req: Request, res: Response) => {
   const result = await refreshTokenService({ refreshToken });
 
   // Set refresh token in HttpOnly cookie
-  res.cookie("refreshToken", result.refreshToken, {
-    httpOnly: true,
-    secure: true, // true in production (HTTPS)
-    sameSite: "none",
-  });
+  res.cookie(
+    "refreshToken",
+    result.refreshToken,
+    getRefreshTokenCookieOptions(req)
+  );
 
   return res.status(200).json(result);
 });
 export const logout4 = wrapAsync(async () => {});
+
+export const forgotPassword = wrapAsync(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new BadRequestError("Email is required");
+    }
+
+    await forgotPasswordService({ email });
+
+    return res.status(200).json({
+      message:
+        "If an account with that email exists, a password reset link has been sent.",
+    });
+  }
+);
+
+export const resetPassword = wrapAsync(
+  async (req: Request, res: Response) => {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      throw new BadRequestError("Token and new password are required");
+    }
+
+    const result = await resetPasswordService({ token, newPassword });
+
+    res.clearCookie("refreshToken", getRefreshTokenCookieOptions(req));
+
+    return res.status(200).json(result);
+  }
+);

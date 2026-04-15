@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import prisma from "../config/db";
 import bcrypt from "bcryptjs";
 import NodeCache from "node-cache";
@@ -7,6 +8,7 @@ import { authenticator } from "otplib";
 import UnauthorizedError from "../errors/UnauthorizedError";
 import { Request } from "express";
 import QRCode from "qrcode";
+import { sendPasswordResetEmail } from "../util/mail";
 
 export const Role = {
   ADMIN: "ADMIN",
@@ -19,7 +21,7 @@ interface RegisterInput {
   name: string;
   email: string;
   password: string;
-  role: "ADMIN" | "USER";
+  role?: "ADMIN" | "USER";
 }
 
 interface LoginInput {
@@ -102,7 +104,7 @@ export async function registerService({
 
   return {
     message: "User registered successfully",
-    userId: user.id,
+    id: user.id,
     accessToken,
     refreshToken,
   };
@@ -237,8 +239,9 @@ export async function changePasswordService({
 }
 
 export async function twoFaLoginService({ tempToken, totp }: TwoFaLogin) {
+  const cacheKey = process.env.CACHE_TEMPORARY_TOKEN_PREFIX + tempToken;
   const userId = cache.get(
-    process.env.CACHE_TEMPORARY_TOKEN_PREFIX + tempToken
+    cacheKey
   );
 
   if (!userId) {
@@ -287,6 +290,8 @@ export async function twoFaLoginService({ tempToken, totp }: TwoFaLogin) {
       },
     });
 
+    cache.del(cacheKey);
+
     return {
       id: user.id,
       name: user.name,
@@ -296,6 +301,8 @@ export async function twoFaLoginService({ tempToken, totp }: TwoFaLogin) {
       twoFaEnable: user.twoFAEnable,
     };
   }
+
+  throw new UnauthorizedError("Two-factor authentication is not available");
 }
 
 export async function logoutService(req: Request) {
@@ -423,6 +430,109 @@ export async function disableTwoFaService({
   });
 
   return { message: "2FA disabled successfully" };
+}
+
+export async function forgotPasswordService({ email }: { email: string }) {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    return;
+  }
+
+  const RESET_TOKEN_TTL = Number(
+    process.env.RESET_PASSWORD_TOKEN_EXPIRES_IN_SECONDS ?? "1800"
+  );
+
+  await prisma.passwordResetToken.deleteMany({
+    where: { userId: user.id },
+  });
+
+  const rawToken = crypto.randomUUID();
+  const tokenHash = crypto
+    .createHmac("sha256", process.env.RESET_TOKEN_SECRET_KEY!)
+    .update(rawToken)
+    .digest("hex");
+
+  await prisma.passwordResetToken.create({
+    data: {
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + RESET_TOKEN_TTL * 1000),
+    },
+  });
+
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
+
+  await sendPasswordResetEmail({ to: user.email, resetUrl });
+}
+
+export async function resetPasswordService({
+  token,
+  newPassword,
+}: {
+  token: string;
+  newPassword: string;
+}) {
+  if (!newPassword || newPassword.length < 8) {
+    throw new BadRequestError(
+      "Password must be at least 8 characters"
+    );
+  }
+
+  const tokens = await prisma.passwordResetToken.findMany({
+    where: {
+      expiresAt: { gt: new Date() },
+    },
+  });
+
+  const incomingHash = crypto
+    .createHmac("sha256", process.env.RESET_TOKEN_SECRET_KEY!)
+    .update(token)
+    .digest("hex");
+
+  const validToken =
+    tokens.find((t) => t.usedAt === null && t.tokenHash === incomingHash) ??
+    null;
+
+  if (!validToken) {
+    throw new BadRequestError("Invalid or expired reset token");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: validToken.userId },
+  });
+
+  if (!user) {
+    throw new BadRequestError("User not found");
+  }
+
+  const sameAsCurrent = await bcrypt.compare(newPassword, user.passwordHash);
+  if (sameAsCurrent) {
+    throw new BadRequestError(
+      "New password cannot be the same as your current password"
+    );
+  }
+
+  const newHash = await bcrypt.hash(newPassword, 10);
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: newHash,
+        passwordChangedAt: new Date(),
+      },
+    }),
+    prisma.passwordResetToken.update({
+      where: { id: validToken.id },
+      data: { usedAt: new Date() },
+    }),
+    prisma.refreshToken.deleteMany({
+      where: { userId: user.id },
+    }),
+  ]);
+
+  return { message: "Password reset successfully" };
 }
 
 export async function refreshTokenService({

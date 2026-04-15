@@ -15,7 +15,12 @@ export async function userService({ userId }: { userId: string }) {
     throw new EntityNotFoundError("User not found");
   }
 
-  const userDetail = { id: user.id, name: user.name, email: user.email };
+  const userDetail = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    twoFaEnable: user.twoFAEnable,
+  };
 
   return userDetail;
 }

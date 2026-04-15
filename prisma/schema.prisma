@@ -8,20 +8,21 @@ datasource db {
 }
 
 model User {
-  id                String             @id @default(auto()) @map("_id") @db.ObjectId
-  name              String
-  email             String             @unique
-  passwordHash      String
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  role              Role               @default(USER)
-  passwordChangedAt DateTime           @default(now())
-  twoFAEnable       Boolean            @default(false)
-  twoFASecret       String?
-  Category          Category[]
-  RefreshToken      RefreshToken[]
-  Session           Session[]
-  UserInvalidToken  UserInvalidToken[]
+  id                  String               @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  email               String               @unique
+  passwordHash        String
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  role                Role                 @default(USER)
+  passwordChangedAt   DateTime             @default(now())
+  twoFAEnable         Boolean              @default(false)
+  twoFASecret         String?
+  Category            Category[]
+  RefreshToken        RefreshToken[]
+  Session             Session[]
+  UserInvalidToken    UserInvalidToken[]
+  PasswordResetToken  PasswordResetToken[]
 }
 
 model Category {
@@ -87,4 +88,17 @@ enum Role {
 enum SessionType {
   timer
   stopwatch
+}
+
+model PasswordResetToken {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  tokenHash   String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tokenHash])
+  @@index([userId], map: "PasswordResetToken_userId_fkey")
 }

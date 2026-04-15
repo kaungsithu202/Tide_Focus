@@ -30,7 +30,10 @@ export const getCategory = wrapAsync(async (req: Request, res: Response) => {
     throw new BadRequestError("Invalid category ID");
   }
 
-  const result = await getCategoryService({ categoryId: id });
+  const result = await getCategoryService({
+    categoryId: id,
+    userId: req.user.id,
+  });
 
   return res.status(200).json(result);
 });
@@ -68,6 +71,7 @@ export const updateCategory = wrapAsync(async (req: Request, res: Response) => {
     id,
     name,
     color,
+    userId: req.user.id,
   });
 
   return res.status(200).json(result);
@@ -82,6 +86,7 @@ export const deleteCategory = wrapAsync(async (req: Request, res: Response) => {
 
   await deleteCategoryService({
     categoryId: id,
+    userId: req.user.id,
   });
 
   return res.status(200).json({

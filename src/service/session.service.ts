@@ -3,6 +3,22 @@ import BadRequestError from "../errors/BadRequestError";
 import EntityNotFoundError from "../errors/EntityNotFoundError";
 import { GetAllSessionService } from "../types/session";
 
+const getOwnedSession = async ({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) => {
+  const session = await prisma.session.findFirst({
+    where: { id, userId },
+  });
+
+  if (!session) throw new EntityNotFoundError("Session not found!");
+
+  return session;
+};
+
 export const startSessionService = async ({
   userId,
   categoryId,
@@ -14,9 +30,10 @@ export const startSessionService = async ({
   durationSeconds: number;
   type: "stopwatch" | "timer";
 }) => {
-  const category = await prisma.category.findUnique({
+  const category = await prisma.category.findFirst({
     where: {
       id: categoryId,
+      userId,
     },
   });
 
@@ -71,12 +88,14 @@ export const getAllSessionsService = async ({
   });
 };
 
-export const pauseSessionService = async ({ id }: { id: string }) => {
-  const session = await prisma.session.findUnique({
-    where: { id },
-  });
-
-  if (!session) throw new EntityNotFoundError("Session not found!");
+export const pauseSessionService = async ({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) => {
+  const session = await getOwnedSession({ id, userId });
 
   if (session.isCompleted)
     throw new BadRequestError("Session already completed");
@@ -98,12 +117,14 @@ export const pauseSessionService = async ({ id }: { id: string }) => {
   return updated;
 };
 
-export const resumeSessionService = async ({ id }: { id: string }) => {
-  const session = await prisma.session.findUnique({
-    where: { id },
-  });
-
-  if (!session) throw new EntityNotFoundError("Session not found!");
+export const resumeSessionService = async ({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) => {
+  const session = await getOwnedSession({ id, userId });
 
   if (!session.pausedAt) throw new BadRequestError("Session is not paused");
 
@@ -124,12 +145,14 @@ export const resumeSessionService = async ({ id }: { id: string }) => {
   return updated;
 };
 
-export const completedSessionService = async ({ id }: { id: string }) => {
-  const session = await prisma.session.findUnique({
-    where: { id },
-  });
-
-  if (!session) throw new EntityNotFoundError("Session not found!");
+export const completedSessionService = async ({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) => {
+  const session = await getOwnedSession({ id, userId });
 
   if (session.isCompleted)
     throw new BadRequestError("Session already completed");
@@ -160,12 +183,14 @@ export const completedSessionService = async ({ id }: { id: string }) => {
   return updated;
 };
 
-export const deleteSessionService = async ({ id }: { id: string }) => {
-  const session = await prisma.session.findUnique({
-    where: { id },
-  });
-
-  if (!session) throw new EntityNotFoundError("Session not found!");
+export const deleteSessionService = async ({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) => {
+  await getOwnedSession({ id, userId });
 
   return await prisma.session.delete({
     where: { id },

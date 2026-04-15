@@ -1,4 +1,6 @@
 import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import prisma from "./config/db";
 import errorHandler from "./middleware/errorHandler";
@@ -18,7 +20,6 @@ main()
     process.exit(1);
   });
 
-dotenv.config();
 const port = 4000;
 
 const app = express();

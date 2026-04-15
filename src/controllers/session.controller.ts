@@ -69,7 +69,7 @@ export const pauseSession = wrapAsync(async (req: Request, res: Response) => {
     throw new BadRequestError("Invalid session ID");
   }
 
-  const result = await pauseSessionService({ id });
+  const result = await pauseSessionService({ id, userId: req.user.id });
 
   return res.status(200).json({ message: "Session paused", result });
 });
@@ -81,7 +81,7 @@ export const resumeSession = wrapAsync(async (req: Request, res: Response) => {
     throw new BadRequestError("Invalid session ID");
   }
 
-  const result = await resumeSessionService({ id });
+  const result = await resumeSessionService({ id, userId: req.user.id });
 
   return res.status(200).json({ message: "Session resumed", result });
 });
@@ -94,7 +94,7 @@ export const completedSession = wrapAsync(
       throw new BadRequestError("Invalid session ID");
     }
 
-    const result = await completedSessionService({ id });
+    const result = await completedSessionService({ id, userId: req.user.id });
 
     return res.status(200).json({ message: "Session completed", result });
   }
@@ -107,7 +107,7 @@ export const deleteSession = wrapAsync(async (req: Request, res: Response) => {
     throw new BadRequestError("Invalid session ID");
   }
 
-  await deleteSessionService({ id });
+  await deleteSessionService({ id, userId: req.user.id });
 
   return res.status(204).json({ message: "Session deleted" });
 });
