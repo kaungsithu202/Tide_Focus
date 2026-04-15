@@ -490,9 +490,9 @@ export async function resetPasswordService({
     .update(token)
     .digest("hex");
 
-  const validToken =
-    tokens.find((t) => t.usedAt === null && t.tokenHash === incomingHash) ??
-    null;
+    
+
+  const validToken = tokens.find((t) => t.usedAt === null && t.tokenHash === incomingHash) ?? null;
 
   if (!validToken) {
     throw new BadRequestError("Invalid or expired reset token");
