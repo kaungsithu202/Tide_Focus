@@ -9,6 +9,13 @@ import {
 } from "../service/categories.service";
 import BadRequestError from "../errors/BadRequestError";
 
+const objectIdRegex = /^[a-f\d]{24}$/i;
+
+const isValidObjectId = (value: string) => objectIdRegex.test(value);
+
+const getParamValue = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+
 export const getAllCategories = wrapAsync(
   async (req: Request, res: Response) => {
     const result = await getAllCategoriesService({ userId: req.user.id });
@@ -17,7 +24,11 @@ export const getAllCategories = wrapAsync(
 );
 
 export const getCategory = wrapAsync(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = getParamValue(req.params.id);
+
+  if (!id || !isValidObjectId(id)) {
+    throw new BadRequestError("Invalid category ID");
+  }
 
   const result = await getCategoryService({ categoryId: id });
 
@@ -41,9 +52,9 @@ export const createCategory = wrapAsync(async (req: Request, res: Response) => {
 });
 
 export const updateCategory = wrapAsync(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = getParamValue(req.params.id);
 
-  if (isNaN(id) || id <= 0) {
+  if (!id || !isValidObjectId(id)) {
     throw new BadRequestError("Invalid category ID");
   }
 
@@ -63,9 +74,9 @@ export const updateCategory = wrapAsync(async (req: Request, res: Response) => {
 });
 
 export const deleteCategory = wrapAsync(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = getParamValue(req.params.id);
 
-  if (isNaN(id) || id <= 0) {
+  if (!id || !isValidObjectId(id)) {
     throw new BadRequestError("Invalid category ID");
   }
 

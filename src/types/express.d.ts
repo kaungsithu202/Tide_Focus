@@ -4,12 +4,12 @@ import * as express from 'express'
 declare global {
   namespace Express {
     interface UserPayload extends JwtPayload {
-      userId: number;
+      userId: string;
     }
 
     interface Request {
       user: {
-        id: number;
+        id: string;
       };
       accessToken: {
         value: string;

@@ -28,7 +28,7 @@ interface LoginInput {
 }
 
 interface ChangePassword {
-  userId: number;
+  userId: string;
   currentPassword: string;
   newPassword: string;
   totp: string;
@@ -40,13 +40,13 @@ interface TwoFaLogin {
 }
 
 interface DisableTwoFaLogin {
-  userId: number;
+  userId: string;
   currentPassword: string;
   totp: string;
 }
 
 interface RefreshTokenPayload extends jwt.JwtPayload {
-  userId: number;
+  userId: string;
 }
 
 const cache = new NodeCache();
@@ -249,7 +249,7 @@ export async function twoFaLoginService({ tempToken, totp }: TwoFaLogin) {
 
   const user = await prisma.user.findUnique({
     where: {
-      id: userId as number,
+      id: userId as string,
     },
   });
 
@@ -324,7 +324,7 @@ export async function logoutService(req: Request) {
   });
 }
 
-export async function generateTwoFaService({ userId }: { userId: number }) {
+export async function generateTwoFaService({ userId }: { userId: string }) {
   const user = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -355,7 +355,7 @@ export async function validateTwoFaService({
   userId,
   totp,
 }: {
-  userId: number;
+  userId: string;
   totp: string;
 }) {
   const user = await prisma.user.findUnique({

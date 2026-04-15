@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                Int                @id @default(autoincrement())
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
   name              String
   email             String             @unique
   passwordHash      String
@@ -25,8 +25,8 @@ model User {
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
-  userId    Int
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
   name      String
   color     String?
   createdAt DateTime  @default(now())
@@ -38,9 +38,9 @@ model Category {
 }
 
 model Session {
-  id                 Int         @id @default(autoincrement())
-  userId             Int
-  categoryId         Int?
+  id                 String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String      @db.ObjectId
+  categoryId         String?     @db.ObjectId
   type               SessionType
   durationSeconds    Int?
   elapsedSeconds     Int         @default(0)
@@ -59,8 +59,8 @@ model Session {
 }
 
 model RefreshToken {
-  id           Int      @id @default(autoincrement())
-  userId       Int
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
   refreshToken String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
@@ -70,9 +70,9 @@ model RefreshToken {
 }
 
 model UserInvalidToken {
-  id             Int    @id @default(autoincrement())
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
   accessToken    String
-  userId         Int
+  userId         String @db.ObjectId
   expirationTime Int
   user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 

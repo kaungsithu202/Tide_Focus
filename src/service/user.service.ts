@@ -6,7 +6,7 @@
 import prisma from "../config/db";
 import EntityNotFoundError from "../errors/EntityNotFoundError";
 
-export async function userService({ userId }: { userId: number }) {
+export async function userService({ userId }: { userId: string }) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });

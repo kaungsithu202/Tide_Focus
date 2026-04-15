@@ -1,14 +1,14 @@
 export interface CreateCategoryDto {
   name: string;
   color: string;
-  userId: number;
+  userId: string;
 }
 export interface UpdateCategoryDto {
-  id: number;
+  id: string;
   name: string;
   color: string;
 }
 
 export interface GetCategory {
-  categoryId: number;
+  categoryId: string;
 }

@@ -4,9 +4,9 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import UnauthorizedError from "../errors/UnauthorizedError";
 import InternalServerError from "../errors/InternalServerError";
 
-// interface AccessTokenPayload extends jwt.JwtPayload {
-//   userId: number;
-// }
+interface AccessTokenPayload extends JwtPayload {
+  userId: string;
+}
 
 const authGuard = async (req: Request, res: Response, next: NextFunction) => {
   const authorization = req.headers.authorization;
@@ -32,11 +32,11 @@ const authGuard = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const decodedAccessToken = jwt.verify(
       accessToken,
-      process.env.ACCESS_TOKEN_SECRET_KEY!
-    ) as JwtPayload;
+      process.env.ACCESS_TOKEN_SECRET_KEY!,
+    ) as AccessTokenPayload;
 
     req.user = { id: decodedAccessToken.userId };
-    req.accessToken = { value: accessToken, exp: decodedAccessToken?.iat };
+    req.accessToken = { value: accessToken, exp: decodedAccessToken.exp };
 
     next();
   } catch (error: unknown) {

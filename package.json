@@ -5,9 +5,12 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
-    "build": "npx tsc",
+    "build": "tsc",
     "start": "node dist/server.js",
-    "migrate": "npx prisma migrate dev --name init",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:validate": "prisma validate",
+    "migrate": "prisma db push",
     "postinstall": "prisma generate"
   },
   "keywords": [],

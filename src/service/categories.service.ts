@@ -9,7 +9,7 @@ import {
 export const getAllCategoriesService = async ({
   userId,
 }: {
-  userId: number;
+  userId: string;
 }) => {
   return await prisma.category.findMany({
     where: { userId },
@@ -66,7 +66,7 @@ export const updateCategoryService = async ({
 export const deleteCategoryService = async ({
   categoryId,
 }: {
-  categoryId: number;
+  categoryId: string;
 }) => {
   return await prisma.category.delete({
     where: { id: categoryId },

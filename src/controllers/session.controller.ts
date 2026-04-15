@@ -5,15 +5,27 @@ import {
   deleteSessionService,
   getAllSessionsService,
   pauseSessionService,
+  resumeSessionService,
   startSessionService,
 } from "../service/session.service";
 import { wrapAsync } from "../util/util";
+
+const objectIdRegex = /^[a-f\d]{24}$/i;
+
+const isValidObjectId = (value: string) => objectIdRegex.test(value);
+
+const getParamValue = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
 
 export const startSession = wrapAsync(async (req: Request, res: Response) => {
   const { categoryId, durationSeconds, type } = req.body;
 
   if (!categoryId || !type) {
     throw new BadRequestError("Please fill all fields categoryId  and type");
+  }
+
+  if (typeof categoryId !== "string" || !isValidObjectId(categoryId)) {
+    throw new BadRequestError("Invalid categoryId");
   }
 
   if (type === "timer" && !durationSeconds) {
@@ -51,7 +63,11 @@ export const getAllSessions = wrapAsync(
 );
 
 export const pauseSession = wrapAsync(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = getParamValue(req.params.id);
+
+  if (!id || !isValidObjectId(id)) {
+    throw new BadRequestError("Invalid session ID");
+  }
 
   const result = await pauseSessionService({ id });
 
@@ -59,16 +75,24 @@ export const pauseSession = wrapAsync(async (req: Request, res: Response) => {
 });
 
 export const resumeSession = wrapAsync(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = getParamValue(req.params.id);
 
-  const result = await pauseSessionService({ id });
+  if (!id || !isValidObjectId(id)) {
+    throw new BadRequestError("Invalid session ID");
+  }
+
+  const result = await resumeSessionService({ id });
 
   return res.status(200).json({ message: "Session resumed", result });
 });
 
 export const completedSession = wrapAsync(
   async (req: Request, res: Response) => {
-    const id = Number(req.params.id);
+    const id = getParamValue(req.params.id);
+
+    if (!id || !isValidObjectId(id)) {
+      throw new BadRequestError("Invalid session ID");
+    }
 
     const result = await completedSessionService({ id });
 
@@ -77,7 +101,11 @@ export const completedSession = wrapAsync(
 );
 
 export const deleteSession = wrapAsync(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = getParamValue(req.params.id);
+
+  if (!id || !isValidObjectId(id)) {
+    throw new BadRequestError("Invalid session ID");
+  }
 
   await deleteSessionService({ id });
 

@@ -9,8 +9,8 @@ export const startSessionService = async ({
   durationSeconds,
   type,
 }: {
-  userId: number;
-  categoryId: number;
+  userId: string;
+  categoryId: string;
   durationSeconds: number;
   type: "stopwatch" | "timer";
 }) => {
@@ -39,9 +39,9 @@ export const getAllSessionsService = async ({
   endDate,
   userId,
 }: GetAllSessionService) => {
-  console.log("trigger", userId);
   const whereClause: any = {
     isCompleted: true,
+    userId,
   };
 
   if (startDate && endDate) {
@@ -49,8 +49,6 @@ export const getAllSessionsService = async ({
       gte: startDate,
       lte: endDate,
     };
-  } else {
-    whereClause.userId = userId;
   }
 
   return await prisma.session.findMany({
@@ -73,7 +71,7 @@ export const getAllSessionsService = async ({
   });
 };
 
-export const pauseSessionService = async ({ id }: { id: number }) => {
+export const pauseSessionService = async ({ id }: { id: string }) => {
   const session = await prisma.session.findUnique({
     where: { id },
   });
@@ -100,7 +98,7 @@ export const pauseSessionService = async ({ id }: { id: number }) => {
   return updated;
 };
 
-export const resumeSessionService = async ({ id }: { id: number }) => {
+export const resumeSessionService = async ({ id }: { id: string }) => {
   const session = await prisma.session.findUnique({
     where: { id },
   });
@@ -112,7 +110,7 @@ export const resumeSessionService = async ({ id }: { id: number }) => {
   const now = new Date();
 
   const pausedDuration = Math.floor(
-    (now.getTime() - session.pausedAt.getTime()) / 1000
+    (now.getTime() - session.pausedAt.getTime()) / 1000,
   );
 
   const updated = await prisma.session.update({
@@ -126,7 +124,7 @@ export const resumeSessionService = async ({ id }: { id: number }) => {
   return updated;
 };
 
-export const completedSessionService = async ({ id }: { id: number }) => {
+export const completedSessionService = async ({ id }: { id: string }) => {
   const session = await prisma.session.findUnique({
     where: { id },
   });
@@ -139,7 +137,7 @@ export const completedSessionService = async ({ id }: { id: number }) => {
   const now = new Date();
 
   let elapsed = Math.floor(
-    (now.getTime() - session.startedAt.getTime()) / 1000
+    (now.getTime() - session.startedAt.getTime()) / 1000,
   );
 
   if (session.pausedAt) {
@@ -162,7 +160,7 @@ export const completedSessionService = async ({ id }: { id: number }) => {
   return updated;
 };
 
-export const deleteSessionService = async ({ id }: { id: number }) => {
+export const deleteSessionService = async ({ id }: { id: string }) => {
   const session = await prisma.session.findUnique({
     where: { id },
   });
